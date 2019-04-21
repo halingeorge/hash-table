@@ -14,5 +14,5 @@ add_executable(
     hash_table_benchmark.cpp
 )
 
-set_target_properties(hash_table_benchmark PROPERTIES COMPILE_FLAGS "-pthread -std=c++17")
+set_target_properties(hash_table_benchmark PROPERTIES COMPILE_FLAGS "-pthread -std=c++17 -O3")
 target_link_libraries(hash_table_benchmark benchmark_main gtest_main)

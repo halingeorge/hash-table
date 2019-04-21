@@ -10,15 +10,15 @@ TEST(RCULock, SynchronizeWithReaders) {
     const int32_t kMinSleep = 100;
     const int32_t kMaxSleep = 1000;
 
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_int_distribution<int> distribution(kMinSleep, kMaxSleep);
-
     RCULock rcu_lock;
 
     std::atomic<size_t> readers_completed{0};
 
     auto reader_routine = [&]() {
+        std::random_device rd;
+        std::mt19937 mt(rd());
+        std::uniform_int_distribution<int> distribution(kMinSleep, kMaxSleep);
+
         rcu_lock.ReadLock();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(distribution(mt)));

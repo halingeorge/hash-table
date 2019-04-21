@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(concurrency)
 
-set(CMAKE_BUILD_TYPE Release)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(googletest)

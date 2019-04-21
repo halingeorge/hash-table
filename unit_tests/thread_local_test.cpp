@@ -45,13 +45,13 @@ TEST(ThreadLocal, IterateThreadLocalValues) {
     ThreadLocal<int> tl;
 
     static const size_t kThreads = 10;
-    size_t passed_threads = 0;
+    std::atomic<size_t> passed_threads{0};
 
     auto accessor = [&tl, &passed_threads](int thread_index) {
         *tl = thread_index;
 
-        ++passed_threads;
-        while (passed_threads < kThreads) {
+        passed_threads.fetch_add(1);
+        while (passed_threads.load() < kThreads) {
             std::this_thread::yield();
         }
 
