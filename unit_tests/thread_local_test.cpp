@@ -1,7 +1,8 @@
 #include "thread_local.h"
 #include <gtest/gtest.h>
 #include <thread>
-#include <experimental/barrier>
+#include <chrono>
+#include <vector>
 
 TEST(ThreadLocal, SetAndGet) {
     ThreadLocal<int> tl;
@@ -44,15 +45,15 @@ TEST(ThreadLocal, IterateThreadLocalValues) {
     ThreadLocal<int> tl;
 
     static const size_t kThreads = 10;
-    twist::OnePassBarrier barrier{kThreads};
+    size_t passed_threads = 0;
 
-    auto accessor = [&tl, &barrier](int thread_index) {
+    auto accessor = [&tl, &passed_threads](int thread_index) {
         *tl = thread_index;
 
-        barrier.PassThrough();
-
-        // Writes to thread-local values ordered with the following reads
-        // through barrier.PassThrough()
+        ++passed_threads;
+        while (passed_threads < kThreads) {
+            std::this_thread::yield();
+        }
 
         size_t total = 0;
         size_t thread_count = 0;
@@ -66,8 +67,12 @@ TEST(ThreadLocal, IterateThreadLocalValues) {
         ASSERT_EQ(total, kThreads * (kThreads - 1) / 2);
     };
 
-    twist::ScopedExecutor executor;
+    std::vector<std::thread> threads;
+    threads.reserve(kThreads);
     for (size_t i = 0; i < kThreads; ++i) {
-        executor.Submit(accessor, i);
+        threads.emplace_back(accessor, i);
+    }
+    for (size_t i = 0; i < kThreads; i++) {
+        threads[i].join();
     }
 }

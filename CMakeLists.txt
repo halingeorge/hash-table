@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.8)
 
 project(concurrency)
 
-set(CMAKE_CXX_STANDARD 17)
+set(BENCHMARK_ENABLE_TESTING OFF)
 
 add_subdirectory(googletest)
-add_subdirectory(tests)
+add_subdirectory(benchmark)
+
+add_subdirectory(unit_tests)
+add_subdirectory(benchmark_tests)

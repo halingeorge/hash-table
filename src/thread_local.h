@@ -6,6 +6,7 @@
 #include <iostream>
 #include <atomic>
 #include <pthread.h>
+#include <thread>
 
 template <typename T>
 class ThreadLocal {
@@ -30,8 +31,6 @@ public:
         clear_list();
     }
 
-    // Access thread-local value
-
     T& operator*() {
         return *check_or_create_new_vertex();
     }
@@ -40,12 +39,10 @@ public:
         return check_or_create_new_vertex();
     }
 
-    // Iterate over thread-local values of all threads
-
     class Iterator {
     public:
         Iterator(Node* current)
-                : current_(current) {
+            : current_(current) {
         }
 
         T& operator*() const {
@@ -72,13 +69,11 @@ public:
         Node* current_;
     };
 
-    // Range-based for loop
-
-    Iterator begin() {  // NOLINT
+    Iterator begin() {
         return Iterator(head_.load()->next.load());
     }
 
-    Iterator end() {  // NOLINT
+    Iterator end() {
         return Iterator(nullptr);
     }
 
@@ -124,5 +119,5 @@ private:
 
     std::atomic<Node*> head_{nullptr};
     std::atomic<Node*> tail_{nullptr};
-    pthread_key_t object_key_;
+    pthread_key_t object_key_{0};
 };
