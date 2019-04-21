@@ -15,5 +15,5 @@ add_executable(
     hash_table_stress_test.cpp
 )
 
-set_target_properties(hash_table_test PROPERTIES COMPILE_FLAGS "-stdlib=libc++ -pthread -std=c++17")
+set_target_properties(hash_table_test PROPERTIES COMPILE_FLAGS "-pthread -std=c++17")
 target_link_libraries(hash_table_test gtest_main)
