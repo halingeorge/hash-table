@@ -23,18 +23,10 @@ class RCULock {
       sync_ts.push_back(el.load());
       cur_ts.push_back(&el);
     }
-    while (true) {
-      bool ok = true;
-      for (int i = 0; i < cur_ts.size(); i++) {
-        if ((sync_ts[i] & 1) && cur_ts[i]->load() == sync_ts[i]) {
-          ok = false;
-          break;
-        }
-      }
-      if (ok) {
-        break;
-      }
-	  std::this_thread::yield();
+    for (int i = 0; i < cur_ts.size(); i++) {
+	  while ((sync_ts[i] & 1) && cur_ts[i]->load() == sync_ts[i]) {
+	    std::this_thread::yield();
+	  }
     }
   }
 
