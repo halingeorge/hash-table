@@ -1,30 +1,43 @@
 #pragma once
 
 #include "thread_local.h"
+
+#include <vector>
+#include <iostream>
 #include <atomic>
 
 class RCULock {
-public:
-    void ReadLock() {
-        __atomic_store_n(thread_local_.operator->(), version_.load() + kMaxThreadNumber, __ATOMIC_SEQ_CST);
-    }
+ public:
+  void ReadLock() {
+    ++(*last_read_);
+  }
 
-    void ReadUnlock() {
-        __atomic_store_n(thread_local_.operator->(), 0, __ATOMIC_SEQ_CST);
-    }
+  void ReadUnlock() {
+    ++(*last_read_);
+  }
 
-    void Synchronize() {
-        for (const auto& value : thread_local_) {
-            while (__atomic_load_n(&value, __ATOMIC_SEQ_CST) >= version_.load()) {
-                std::this_thread::yield();
-            }
+  void Synchronize() {
+    std::vector<std::atomic<int>*> cur_ts;
+    std::vector<int> sync_ts;
+    for (auto& el : last_read_) {
+      sync_ts.push_back(el.load());
+      cur_ts.push_back(&el);
+    }
+    while (true) {
+      bool ok = true;
+      for (int i = 0; i < cur_ts.size(); i++) {
+        if ((sync_ts[i] & 1) && cur_ts[i]->load() == sync_ts[i]) {
+          ok = false;
+          break;
         }
-        version_.fetch_add(1);
+      }
+      if (ok) {
+        break;
+      }
+	  std::this_thread::yield();
     }
+  }
 
-private:
-    static const size_t kMaxThreadNumber = 1000;
-
-    ThreadLocal<size_t> thread_local_;
-    std::atomic<size_t> version_{1};
+  ThreadLocal<std::atomic<int>> last_read_;
 };
+

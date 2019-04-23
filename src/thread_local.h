@@ -12,9 +12,9 @@ template <typename T>
 class ThreadLocal {
 private:
     struct Node {
-        Node(Node* next, T data)
+        Node(Node* next)
             : next(next)
-            , data(std::move(data)) {
+            , data() {
         }
         std::atomic<Node*> next;
         T data;
@@ -23,7 +23,7 @@ private:
 public:
     ThreadLocal() {
         pthread_key_create(&object_key_, nullptr);
-        head_ = new Node(nullptr, T());
+        head_ = new Node(nullptr);
         tail_.store(head_.load());
     }
 
@@ -79,7 +79,7 @@ public:
 
     void clear() {
         clear_list();
-        head_ = new Node(nullptr, T());
+        head_ = new Node(nullptr);
         tail_.store(head_.load());
         pthread_key_create(&object_key_, nullptr);
     }
@@ -104,7 +104,7 @@ private:
     T* check_or_create_new_vertex() {
         Node* pointer = get_pointer();
         if (pointer == nullptr) {
-            Node* new_node_ptr = new Node(nullptr, T());
+            Node* new_node_ptr = new Node(nullptr);
             pointer = new_node_ptr;
             set_pointer(new_node_ptr);
             Node* expected = nullptr;

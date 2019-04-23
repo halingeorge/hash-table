@@ -13,7 +13,7 @@ const int32_t kMaxNumber = 100;
 
 const int32_t kHashTableSize = 1;
 
-const int32_t kMaxAddedNumbers = 1000 * 1000 * 10;
+const int32_t kMaxAddedNumbers = 1000 * 1000 * 100;
 
 std::vector<std::atomic<int32_t>> added_keys(kMaxAddedNumbers);
 std::atomic<size_t> put{0};
